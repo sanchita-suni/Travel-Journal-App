@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
+
 import Earth from "./components/Earth.jsx";
 import TripPlanner from "./components/TripPlanner.jsx";
 import Shelf3D from "./components/Shelf3D.jsx";
 import BookSelection from "./components/BookSelection.jsx";
-import BookEditor from "./components/BookEditor.jsx"; // ✅ Book view page
+import BookEditor from "./components/BookEditor.jsx";
+
+import LoginPage from "./components/LoginPage.jsx";
+import SignupPage from "./components/SignupPage.jsx";
+import ProfilePage from "./components/ProfilePage.jsx";
+
 import "./App.css";
 
-// --- Tailwind Config Loader ---
+/* ------------------------------------------------------
+   Tailwind Loader
+------------------------------------------------------ */
 function TailwindConfig() {
   useEffect(() => {
     const script = document.createElement("script");
@@ -26,9 +34,12 @@ function TailwindConfig() {
   return null;
 }
 
-// --- Navbar ---
+/* ------------------------------------------------------
+   Navbar — Hidden on login/signup pages
+------------------------------------------------------ */
 function Navbar() {
   const navigate = useNavigate();
+
   const navFeatures = [
     { name: "Home", path: "/" },
     { name: "My Library", path: "/library" },
@@ -45,7 +56,7 @@ function Navbar() {
         <div className="flex justify-between items-center h-16">
           <button
             onClick={() => navigate("/")}
-            className="text-xl font-extrabold tracking-tight text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition"
+            className="text-xl font-extrabold tracking-tight text-blue-600 dark:text-blue-400 hover:text-blue-500"
           >
             🌎 Travel Journal App
           </button>
@@ -55,7 +66,7 @@ function Navbar() {
               <button
                 key={feature.path}
                 onClick={() => navigate(feature.path)}
-                className="px-3 py-2 text-sm font-medium rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-50 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white transition"
+                className="px-3 py-2 text-sm font-medium rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 {feature.name}
               </button>
@@ -67,51 +78,53 @@ function Navbar() {
   );
 }
 
-// --- Pages ---
+/* ------------------------------------------------------
+   Protected Route (blocks pages if not logged in)
+------------------------------------------------------ */
+function ProtectedRoute({ children }) {
+  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+  return isLoggedIn ? children : <Navigate to="/login" />;
+}
+
+/* ------------------------------------------------------
+   Pages
+------------------------------------------------------ */
 function HomePage() {
   const navigate = useNavigate();
+
   return (
     <div className="p-8 text-center bg-gray-50 dark:bg-gray-900 min-h-[calc(100vh-64px)] flex flex-col items-center justify-center">
       <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
         Welcome to Your Digital Journal!
       </h1>
+
       <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mb-8">
-        Capture every memory, plan every trip, and share your adventures with the
-        world (or keep them private).
+        Capture every memory, plan every trip, and share your adventures.
       </p>
 
       <section className="mt-10 max-w-4xl w-full grid grid-cols-1 md:grid-cols-3 gap-6">
         <div
-          className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 cursor-pointer"
+          className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg cursor-pointer"
           onClick={() => navigate("/library")}
         >
           <div className="text-blue-500 text-4xl mb-3">📚</div>
-          <h2 className="text-xl font-semibold mb-2">My Library</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">
-            Design new journals and access all your saved trips.
-          </p>
+          <h2 className="text-xl font-semibold">My Library</h2>
         </div>
 
         <div
-          className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 cursor-pointer"
+          className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg cursor-pointer"
           onClick={() => navigate("/planner")}
         >
           <div className="text-green-500 text-4xl mb-3">🗺️</div>
-          <h2 className="text-xl font-semibold mb-2">Trip Planner</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">
-            Visualize your next adventure and organize logistics.
-          </p>
+          <h2 className="text-xl font-semibold">Trip Planner</h2>
         </div>
 
         <div
-          className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 cursor-pointer"
+          className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg cursor-pointer"
           onClick={() => navigate("/profile")}
         >
           <div className="text-purple-500 text-4xl mb-3">👤</div>
-          <h2 className="text-xl font-semibold mb-2">Profile & Settings</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">
-            Manage your account details and theme preferences.
-          </p>
+          <h2 className="text-xl font-semibold">Profile</h2>
         </div>
       </section>
     </div>
@@ -122,10 +135,8 @@ function MyLibraryPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="relative w-full min-h-[calc(100vh-64px)] p-4 md:p-8 bg-gray-200 dark:bg-gray-800">
-      <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">
-        📚 My Private Library
-      </h2>
+    <div className="relative w-full min-h-[calc(100vh-64px)] p-4 bg-gray-200 dark:bg-gray-800">
+      <h2 className="text-3xl font-bold text-center mb-6">📚 My Private Library</h2>
 
       <div className="flex justify-center items-center">
         <Shelf3D />
@@ -133,7 +144,7 @@ function MyLibraryPage() {
 
       <button
         onClick={() => navigate("/book-selection")}
-        className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 text-3xl"
+        className="fixed bottom-6 right-6 bg-blue-600 text-white rounded-full p-4 text-3xl"
       >
         +
       </button>
@@ -153,36 +164,146 @@ function LookupPage() {
 
 function ComingSoon({ title }) {
   return (
-    <div className="p-8 text-center text-gray-900 dark:text-white min-h-[calc(100vh-64px)] flex items-center justify-center">
-      <h2>{title} (Coming Soon!)</h2>
+    <div className="p-8 text-center min-h-[calc(100vh-64px)] flex items-center justify-center">
+      <h2 className="text-gray-900 dark:text-white">{title} (Coming Soon!)</h2>
     </div>
   );
 }
 
-// --- Main App ---
+/* ------------------------------------------------------
+   MAIN APP with Authentication Integration
+------------------------------------------------------ */
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   TailwindConfig();
 
   useEffect(() => {
     const root = document.documentElement;
-    if (isDarkMode) root.classList.add("dark");
-    else root.classList.remove("dark");
+    isDarkMode ? root.classList.add("dark") : root.classList.remove("dark");
   }, [isDarkMode]);
 
+  const hideNavbar =
+    window.location.pathname === "/login" ||
+    window.location.pathname === "/signup";
+
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
-      <Navbar />
+    <div className="min-h-screen bg-white dark:bg-gray-900">
+
+      {/* Hide navbar on login/signup */}
+      {!hideNavbar && <Navbar />}
+
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/library" element={<MyLibraryPage />} />
-        <Route path="/planner" element={<TripPlanner />} />
-        <Route path="/lookup" element={<LookupPage />} />
-        <Route path="/public" element={<ComingSoon title="Public Journals" />} />
-        <Route path="/private" element={<ComingSoon title="Private Journals" />} />
-        <Route path="/profile" element={<ComingSoon title="Profile Page" />} />
-        <Route path="/book-selection" element={<BookSelection />} />
-        <Route path="/book/:id" element={<BookEditor />} /> {/* ✅ New route */}
+        {/* LOGIN PAGE */}
+        <Route
+          path="/login"
+          element={
+            <LoginPage
+              onLogin={() => {
+                localStorage.setItem("isLoggedIn", "true");
+                window.location.href = "/";
+              }}
+              onGoToSignup={() => (window.location.href = "/signup")}
+            />
+          }
+        />
+
+        {/* SIGNUP PAGE */}
+        <Route
+          path="/signup"
+          element={
+            <SignupPage
+              onSignup={() => (window.location.href = "/login")}
+              onGoToLogin={() => (window.location.href = "/login")}
+            />
+          }
+        />
+
+        {/* PROTECTED ROUTES */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/library"
+          element={
+            <ProtectedRoute>
+              <MyLibraryPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/planner"
+          element={
+            <ProtectedRoute>
+              <TripPlanner />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/lookup"
+          element={
+            <ProtectedRoute>
+              <LookupPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/public"
+          element={
+            <ProtectedRoute>
+              <ComingSoon title="Public Journals" />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/private"
+          element={
+            <ProtectedRoute>
+              <ComingSoon title="Private Journals" />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage
+                onLogout={() => {
+                  localStorage.removeItem("isLoggedIn");
+                  window.location.href = "/login";
+                }}
+              />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/book-selection"
+          element={
+            <ProtectedRoute>
+              <BookSelection />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/book/:id"
+          element={
+            <ProtectedRoute>
+              <BookEditor />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </div>
   );

@@ -1,7 +1,10 @@
-// BookEditor.jsx — PART 1 of 3 (BACKWARD TYPING FIX INCLUDED)
+// BookEditor.jsx — FINAL VERSION WITH BACKWARD-TYPING FIX + TRANSFORM FIX
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 
+/* -------------------------------------------------------------
+   IMPORT STICKERS
+------------------------------------------------------------- */
 import stickerIcon from "../assets/stickers/stickers-icon.png";
 import sticker1 from "../assets/stickers/sticker1.png";
 import sticker2 from "../assets/stickers/sticker2.png";
@@ -15,6 +18,9 @@ import sticker9 from "../assets/stickers/sticker9.png";
 import sticker10 from "../assets/stickers/sticker10.png";
 import sticker11 from "../assets/stickers/sticker11.png";
 
+/* -------------------------------------------------------------
+   FONT DROPDOWN
+------------------------------------------------------------- */
 function FontDropdown({ currentFont, onSelect }) {
   const [open, setOpen] = useState(false);
 
@@ -38,7 +44,7 @@ function FontDropdown({ currentFont, onSelect }) {
       </button>
 
       {open && (
-        <div className="absolute w-full bg-white rounded shadow max-h-60 overflow-y-auto z-50">
+        <div className="absolute bg-white shadow w-full max-h-60 overflow-y-auto rounded z-50">
           {fonts.map((font) => (
             <div
               key={font}
@@ -47,7 +53,7 @@ function FontDropdown({ currentFont, onSelect }) {
                 setOpen(false);
               }}
               className="px-3 py-2 hover:bg-gray-200 cursor-pointer"
-              style={{ fontFamily: font, color: "black" }}
+              style={{ fontFamily: font }}
             >
               {font}
             </div>
@@ -58,14 +64,17 @@ function FontDropdown({ currentFont, onSelect }) {
   );
 }
 
+/* -------------------------------------------------------------
+   MAIN BOOK EDITOR
+------------------------------------------------------------- */
 export default function BookEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const query = new URLSearchParams(location.search);
-  const coverImg = location.state?.cover || query.get("cover");
-  const title = location.state?.title || query.get("title") || `Book #${id}`;
+  const q = new URLSearchParams(location.search);
+  const coverImg = location.state?.cover || q.get("cover");
+  const title = location.state?.title || q.get("title") || `Book #${id}`;
 
   const totalPages = 10;
   const [pageIndex, setPageIndex] = useState(0);
@@ -79,6 +88,7 @@ export default function BookEditor() {
   const [fontSize, setFontSize] = useState(18);
   const [textColor, setTextColor] = useState("#000");
 
+  /* STICKERS */
   const stickerList = [
     sticker1, sticker2, sticker3, sticker4, sticker5, sticker6,
     sticker7, sticker8, sticker9, sticker10, sticker11
@@ -93,17 +103,17 @@ export default function BookEditor() {
 
   const lastMouse = useRef({ x: 0, y: 0 });
 
-  /* ----------------------------------------------
+  /* -------------------------------------------------------------
      LOAD GOOGLE FONTS
-  ---------------------------------------------- */
+------------------------------------------------------------- */
   useEffect(() => {
     const href =
       "https://fonts.googleapis.com/css2?family=Dancing+Script&family=Pacifico&family=Great+Vibes&family=Parisienne&family=Satisfy&family=Cookie&family=Caveat:wght@400;700&family=Shadows+Into+Light&family=Playfair+Display:wght@400;600&family=Lobster&family=Amatic+SC:wght@400;700&family=Patrick+Hand&family=Gloria+Hallelujah&display=swap";
 
     if (!document.querySelector(`link[href="${href}"]`)) {
       const link = document.createElement("link");
-      link.rel = "stylesheet";
       link.href = href;
+      link.rel = "stylesheet";
       document.head.appendChild(link);
     }
 
@@ -112,16 +122,14 @@ export default function BookEditor() {
     } catch (_) {}
   }, []);
 
-  /* ----------------------------------------------
-     HARD BACKWARD-TYPING FIX (🔥 ALWAYS LTR)
-  ---------------------------------------------- */
+  /* -------------------------------------------------------------
+     HARD BACKWARD TYPING FIX (REAL & COMPLETE)
+------------------------------------------------------------- */
   useEffect(() => {
-    const enforceDeepLTR = () => {
-      const eds = [leftEditorRef.current, rightEditorRef.current];
-
-      eds.forEach((ed) => {
+    const fixLTRDeep = () => {
+      const editors = [leftEditorRef.current, rightEditorRef.current];
+      editors.forEach((ed) => {
         if (!ed) return;
-
         ed.style.direction = "ltr";
         ed.style.unicodeBidi = "plaintext";
         ed.setAttribute("dir", "ltr");
@@ -134,13 +142,13 @@ export default function BookEditor() {
       });
     };
 
-    document.addEventListener("input", enforceDeepLTR);
-    return () => document.removeEventListener("input", enforceDeepLTR);
+    document.addEventListener("input", fixLTRDeep);
+    return () => document.removeEventListener("input", fixLTRDeep);
   }, []);
 
-  /* ----------------------------------------------
-     EDITOR HELPERS
-  ---------------------------------------------- */
+  /* -------------------------------------------------------------
+     PROVIDE ACTIVE EDITOR
+------------------------------------------------------------- */
   const getActiveEditor = () => {
     if (document.activeElement === rightEditorRef.current) return rightEditorRef.current;
     if (document.activeElement === leftEditorRef.current) return leftEditorRef.current;
@@ -151,13 +159,12 @@ export default function BookEditor() {
     const ed = getActiveEditor();
     if (!ed) return;
     const idx = Number(ed.dataset.pageidx);
-    setPageContent((p) => ({ ...p, [idx]: ed.innerHTML }));
+    setPageContent((prev) => ({ ...prev, [idx]: ed.innerHTML }));
   };
-// BookEditor.jsx — PART 2 of 3
 
-  /* ----------------------------------------------
-     TEXT FORMAT FUNCTIONS
-  ---------------------------------------------- */
+  /* -------------------------------------------------------------
+     TEXT FORMAT
+------------------------------------------------------------- */
   const applyFont = (font) => {
     setCurrentFont(font);
     document.execCommand("fontName", false, font);
@@ -181,41 +188,35 @@ export default function BookEditor() {
     }
   };
 
-  /* ----------------------------------------------
+  /* -------------------------------------------------------------
      PAGE FLIP
-  ---------------------------------------------- */
+------------------------------------------------------------- */
   const flip = (dir) => {
     if (dir === 1 && pageIndex < totalPages - 2) setPageIndex((p) => p + 2);
     else if (dir === -1 && pageIndex > 0) setPageIndex((p) => p - 2);
     else if (dir === -1 && pageIndex === 0) navigate("/library");
   };
 
-  /* ----------------------------------------------
-     SYNC EDITORS ON PAGE CHANGE
-  ---------------------------------------------- */
+  /* -------------------------------------------------------------
+     SYNC ON PAGE CHANGE
+------------------------------------------------------------- */
   useEffect(() => {
     if (leftEditorRef.current) {
-      const el = leftEditorRef.current;
-      el.dataset.pageidx = pageIndex - 1;
-      el.innerHTML = pageContent[pageIndex - 1] || "";
-      el.style.fontFamily = currentFont;
-      el.style.direction = "ltr";
-      el.style.unicodeBidi = "plaintext";
+      const e = leftEditorRef.current;
+      e.dataset.pageidx = pageIndex - 1;
+      e.innerHTML = pageContent[pageIndex - 1] || "";
     }
 
     if (rightEditorRef.current) {
-      const el = rightEditorRef.current;
-      el.dataset.pageidx = pageIndex;
-      el.innerHTML = pageContent[pageIndex] || "";
-      el.style.fontFamily = currentFont;
-      el.style.direction = "ltr";
-      el.style.unicodeBidi = "plaintext";
+      const e = rightEditorRef.current;
+      e.dataset.pageidx = pageIndex;
+      e.innerHTML = pageContent[pageIndex] || "";
     }
-  }, [pageIndex, pageContent, currentFont]);
+  }, [pageIndex, pageContent]);
 
-  /* ----------------------------------------------
+  /* -------------------------------------------------------------
      ADD STICKER
-  ---------------------------------------------- */
+------------------------------------------------------------- */
   const addSticker = (src) => {
     setStickers((prev) => [
       ...prev,
@@ -223,9 +224,9 @@ export default function BookEditor() {
     ]);
   };
 
-  /* ----------------------------------------------
-     STICKER DRAG/RESIZE/ROTATE
-  ---------------------------------------------- */
+  /* -------------------------------------------------------------
+     STICKER HANDLING
+------------------------------------------------------------- */
   const startDrag = (id, e) => {
     e.stopPropagation();
     setActiveStickerId(id);
@@ -270,10 +271,7 @@ export default function BookEditor() {
 
           if (s.id === resizingStickerId) {
             if (resizeHandle !== "rotate") {
-              return {
-                ...s,
-                scale: Math.max(0.2, s.scale + dx * 0.01)
-              };
+              return { ...s, scale: Math.max(0.2, s.scale + dx * 0.01) };
             }
             return { ...s, rotation: s.rotation + dx * 0.5 };
           }
@@ -285,35 +283,35 @@ export default function BookEditor() {
     [movingStickerId, resizingStickerId, resizeHandle]
   );
 
-  const stopTransform = useCallback(() => {
-    setMovingStickerId(null);
-    setResizingStickerId(null);
-    setResizeHandle(null);
-  }, []);
-
   useEffect(() => {
     document.addEventListener("mousemove", moveSticker);
-    document.addEventListener("mouseup", stopTransform);
+    document.addEventListener("mouseup", () => {
+      setMovingStickerId(null);
+      setResizingStickerId(null);
+      setResizeHandle(null);
+    });
     return () => {
       document.removeEventListener("mousemove", moveSticker);
-      document.removeEventListener("mouseup", stopTransform);
     };
-  }, [moveSticker, stopTransform]);
+  }, [moveSticker]);
 
   const handlePageClick = (e) => {
     if (e.target.dataset.sticker) return;
     setActiveStickerId(null);
   };
 
+  /* -------------------------------------------------------------
+     HANDLE STYLES
+------------------------------------------------------------- */
   const handleStyle = (x, y) => ({
     position: "absolute",
     width: "14px",
     height: "14px",
     background: "white",
-    border: "2px solid blue",
+    border: "2px solid #4F46E5",
     borderRadius: "4px",
     transform: `translate(${x}%, ${y}%)`,
-    cursor: "nwse-resize"
+    cursor: "nwse-resize",
   });
 
   const rotateStyle = (x, y) => ({
@@ -321,10 +319,10 @@ export default function BookEditor() {
     width: "20px",
     height: "20px",
     background: "#FFB800",
-    border: "2px solid white",
     borderRadius: "50%",
+    border: "2px solid white",
     transform: `translate(${x}%, ${y}%)`,
-    cursor: "grab"
+    cursor: "grab",
   });
 
   const renderSticker = (s) => {
@@ -339,38 +337,39 @@ export default function BookEditor() {
           left: `${s.x}%`,
           transform: `translate(-50%, -50%) scale(${s.scale}) rotate(${s.rotation}deg)`,
           transformOrigin: "center",
-          cursor: "pointer"
         }}
         onDoubleClick={() => setActiveStickerId(s.id)}
       >
         <img
           src={s.src}
           data-sticker="1"
-          draggable={false}
           onMouseDown={(e) => startDrag(s.id, e)}
-          style={{ width: "90px", height: "90px", userSelect: "none" }}
+          draggable={false}
+          style={{ width: "90px", height: "90px" }}
         />
 
         {active && (
           <>
-            <div data-sticker="1" onMouseDown={(e) => startResize(s.id, "nw", e)} style={handleStyle(-50, -50)} />
-            <div data-sticker="1" onMouseDown={(e) => startResize(s.id, "ne", e)} style={handleStyle(50, -50)} />
-            <div data-sticker="1" onMouseDown={(e) => startResize(s.id, "sw", e)} style={handleStyle(-50, 50)} />
-            <div data-sticker="1" onMouseDown={(e) => startResize(s.id, "se", e)} style={handleStyle(50, 50)} />
-            <div data-sticker="1" onMouseDown={(e) => startRotate(s.id, e)} style={rotateStyle(0, -80)} />
+            <div onMouseDown={(e) => startResize(s.id, "nw", e)} style={handleStyle(-50, -50)} />
+            <div onMouseDown={(e) => startResize(s.id, "ne", e)} style={handleStyle(50, -50)} />
+            <div onMouseDown={(e) => startResize(s.id, "sw", e)} style={handleStyle(-50, 50)} />
+            <div onMouseDown={(e) => startResize(s.id, "se", e)} style={handleStyle(50, 50)} />
+            <div onMouseDown={(e) => startRotate(s.id, e)} style={rotateStyle(0, -80)} />
           </>
         )}
       </div>
     );
   };
-// BookEditor.jsx — PART 3 of 3 (END OF FILE)
 
+  /* -------------------------------------------------------------
+     MAIN UI
+------------------------------------------------------------- */
   return (
     <div
       className="w-full h-screen flex bg-blue-900 text-white overflow-hidden"
       style={{ direction: "ltr" }}
     >
-
+      {/* BACK BUTTON */}
       <button
         onClick={() => navigate("/library")}
         className="absolute top-6 left-6 bg-blue-600 px-4 py-2 rounded shadow z-50"
@@ -378,6 +377,7 @@ export default function BookEditor() {
         ← Back
       </button>
 
+      {/* BOOK AREA */}
       <div className="w-3/4 h-full flex flex-col items-center justify-center">
         <h1 className="text-3xl font-bold mb-4">📘 {title}</h1>
 
@@ -395,33 +395,22 @@ export default function BookEditor() {
               <div
                 ref={leftEditorRef}
                 contentEditable
-                suppressContentEditableWarning
                 data-pageidx={pageIndex - 1}
+                suppressContentEditableWarning
                 onInput={updateContent}
                 className="w-full h-full p-3 text-black leading-relaxed"
                 style={{
-  
                   fontFamily: currentFont,
-  
                   fontSize,
-  
                   color: textColor,
-  
                   direction: "ltr",
-  
                   unicodeBidi: "plaintext",
-  
-                  textAlign: "left",
-
-  
                   whiteSpace: "pre-wrap",
-  
                   overflowWrap: "normal",
-  
                   WebkitLineBreak: "auto",
-
+                  textAlign: "left",
+                  transform: "none", // ⭐ FIXES BACKWARD TYPING
                 }}
-
               />
             )}
           </div>
@@ -431,8 +420,8 @@ export default function BookEditor() {
             <div
               ref={rightEditorRef}
               contentEditable
-              suppressContentEditableWarning
               data-pageidx={pageIndex}
+              suppressContentEditableWarning
               onInput={updateContent}
               className="w-full h-full p-3 text-black leading-relaxed"
               style={{
@@ -441,19 +430,20 @@ export default function BookEditor() {
                 color: textColor,
                 direction: "ltr",
                 unicodeBidi: "plaintext",
-                textAlign: "left",
-
                 whiteSpace: "pre-wrap",
                 overflowWrap: "normal",
                 WebkitLineBreak: "auto",
+                textAlign: "left",
+                transform: "none", // ⭐ FIXES BACKWARD TYPING
               }}
-
             />
 
+            {/* Stickers */}
             {stickers.map((s) => renderSticker(s))}
           </div>
         </div>
 
+        {/* PAGE SWITCH */}
         <div className="flex justify-between w-3/4 mt-5">
           <button
             onClick={() => flip(-1)}
@@ -476,7 +466,7 @@ export default function BookEditor() {
       </div>
 
       {/* TOOLS PANEL */}
-      <div className="w-1/4 h-full bg-blue-800 p-5 space-y-5 overflow-y-auto">
+      <div className="w-1/4 h-full bg-blue-800 p-5 overflow-y-auto space-y-5">
 
         <div>
           <p className="font-semibold mb-1">Font</p>
@@ -485,7 +475,7 @@ export default function BookEditor() {
 
         <div>
           <p className="font-semibold mb-1">Font Size: {fontSize}px</p>
-          <div className="flex gap-3 items-center">
+          <div className="flex items-center gap-3">
             <input
               type="range"
               min="12"
@@ -517,12 +507,12 @@ export default function BookEditor() {
               {[
                 "#000000", "#FF0000", "#0000FF", "#008000",
                 "#FFA500", "#800080", "#FFC0CB", "#FFFFFF"
-              ].map((c) => (
+              ].map((col) => (
                 <button
-                  key={c}
+                  key={col}
                   className="w-8 h-8 rounded border border-white"
-                  style={{ background: c }}
-                  onClick={() => applyColor(c)}
+                  style={{ background: col }}
+                  onClick={() => applyColor(col)}
                 />
               ))}
             </div>
@@ -539,18 +529,19 @@ export default function BookEditor() {
           Clear
         </button>
 
+        {/* Stickers */}
         <div className="pt-4 border-t border-blue-700">
           <p className="font-semibold text-center mb-2">Stickers</p>
           <button
             onClick={() => setShowStickers(true)}
-            className="w-16 h-16 bg-yellow-500 rounded-full mx-auto flex items-center justify-center"
+            className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto"
           >
             <img src={stickerIcon} className="w-8 h-8" />
           </button>
         </div>
       </div>
 
-      {/* STICKER POPUP */}
+      {/* STICKERS POPUP */}
       {showStickers && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-xl relative w-[90%] max-w-md">
@@ -571,7 +562,7 @@ export default function BookEditor() {
                     addSticker(img);
                     setShowStickers(false);
                   }}
-                  className="bg-gray-200 p-3 rounded-lg flex items-center justify-center cursor-pointer hover:scale-105"
+                  className="bg-gray-200 p-3 rounded-lg cursor-pointer hover:scale-105 flex items-center justify-center"
                 >
                   <img src={img} className="w-16 h-16" />
                 </div>

@@ -146,8 +146,7 @@ button:focus-visible {
 }
 
 /* --------------------------------------------------------
-   ⭐ FINAL FIX (add this at bottom) 
-   Prevents backward typing in contentEditable editor
+   ⭐ FIX 1 — Prevent backward typing in contentEditable
 --------------------------------------------------------- */
 
 [contenteditable] {
@@ -164,4 +163,13 @@ button:focus-visible {
   white-space: pre-wrap !important;
   overflow-wrap: normal !important;
   -webkit-line-break: auto !important;
+}
+
+/* --------------------------------------------------------
+   ⭐ FIX 2 — React-Big-Calendar not moving months
+      (Tailwind/Vite box-sizing override)
+--------------------------------------------------------- */
+
+.rbc-calendar * {
+  box-sizing: content-box !important;
 }
