@@ -17,36 +17,33 @@
 /* --- Layout Modifications --- */
 
 body {
-  /* Keep essential layout settings from both sources */
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  /* Removed: display: flex; place-items: center; to allow Navbar to sit at the top */
 }
 
 #root {
-  /* This is the container for the entire React app */
   display: flex;
-  flex-direction: column; /* Stacks Navbar on top of Content */
+  flex-direction: column;
   min-height: 100vh;
   width: 100%;
 }
 
-/* --- Custom Component Styles (Navbar and Content) --- */
+/* --- Navbar Styles --- */
 
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 15px 25px;
-  background-color: #1a1a1a; /* Dark background, matching your theme */
+  background-color: #1a1a1a;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .navbar-title {
   font-size: 1.6em;
   font-weight: 700;
-  color: #646cff; /* Primary Vite color for the app title */
+  color: #646cff;
 }
 
 .navbar-links {
@@ -61,7 +58,7 @@ body {
 }
 
 .navbar-links a {
-  color: rgba(255, 255, 255, 0.87); /* Inherit root color */
+  color: rgba(255, 255, 255, 0.87);
   text-decoration: none;
   padding: 5px 10px;
   border-radius: 6px;
@@ -73,8 +70,10 @@ body {
   color: #646cff;
 }
 
+/* --- Page Content --- */
+
 .content-area {
-  flex-grow: 1; /* Takes up all remaining space below the Navbar */
+  flex-grow: 1;
   padding: 40px 20px;
   text-align: center;
 }
@@ -83,7 +82,7 @@ body {
   color: #646cff;
 }
 
-/* --- Default Vite Styles (Kept as provided by user) --- */
+/* --- Default Vite Styles --- */
 
 a {
   font-weight: 500;
@@ -118,6 +117,8 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* --- Light Mode Support --- */
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -129,15 +130,38 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
-  /* Ensure Navbar is visible in light mode */
+
   .navbar {
     background-color: #f0f0f0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
+
   .navbar-links a {
     color: #213547;
   }
+
   .navbar-links a:hover {
     background-color: #e0e0e0;
   }
+}
+
+/* --------------------------------------------------------
+   ⭐ FINAL FIX (add this at bottom) 
+   Prevents backward typing in contentEditable editor
+--------------------------------------------------------- */
+
+[contenteditable] {
+  direction: ltr !important;
+  unicode-bidi: plaintext !important;
+  white-space: pre-wrap !important;
+  overflow-wrap: normal !important;
+  -webkit-line-break: auto !important;
+}
+
+[contenteditable] * {
+  direction: ltr !important;
+  unicode-bidi: plaintext !important;
+  white-space: pre-wrap !important;
+  overflow-wrap: normal !important;
+  -webkit-line-break: auto !important;
 }
