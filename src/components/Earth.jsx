@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import gsap from "gsap";
@@ -173,15 +173,8 @@ const textureLoader = new THREE.TextureLoader(); // Assuming 'loader' in HEAD re
     const input = document.getElementById("searchInput");
     const searchBtn = document.getElementById("searchBtn");
     const pinBtn = document.getElementById("pinBtn");
-    const mapSelect = document.getElementById("mapStyleSelect");
+    const myLocationBtn = document.getElementById("myLocationBtn");
     const full = document.getElementById("fullScreenBtn");
-
-    // Map Style Switch
-    mapSelect.addEventListener("change", (e) => {
-      const mode = e.target.value;
-      earth.material.map = textures[mode];
-      earth.material.needsUpdate = true;
-    });
 
     // Fullscreen
     full.onclick = () =>
@@ -309,13 +302,14 @@ const textureLoader = new THREE.TextureLoader(); // Assuming 'loader' in HEAD re
     };
     animate();
 
-    window.addEventListener("resize", () => {
+    const handleResize = () => {
       camera.aspect = mount.clientWidth / mount.clientHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(mount.clientWidth, mount.clientHeight);
-    });
+    };
+    window.addEventListener("resize", handleResize);
 
-const getWeather = async (lat, lon) => {
+    const getWeather = async (lat, lon) => {
       try {
         const apiKey = "d680487912ad4df95a77093148650871";
         const res = await fetch(
@@ -364,6 +358,8 @@ const getWeather = async (lat, lon) => {
 
       getWeather(lat, lon);
     }
+
+    const pins = [];
 
     function pinPlace() {
       if (!camera.userData.lastCoords) return alert("Search a place first!");
@@ -414,7 +410,7 @@ const getWeather = async (lat, lon) => {
 
     searchBtn.addEventListener("click", searchPlace);
     pinBtn.addEventListener("click", pinPlace);
-    myLocationBtn.addEventListener("click", pinMyLocation);
+    myLocationBtn && myLocationBtn.addEventListener("click", pinMyLocation);
 
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -448,6 +444,7 @@ const getWeather = async (lat, lon) => {
         <input id="searchInput" placeholder="Search place..." style={{ width: 320, padding: 12, borderRadius: 10, border: "none", outline: "none", background: "rgba(255,255,255,0.07)", color: "white" }} />
         <button id="searchBtn" style={{ background: "#0b79ff", color: "#fff", padding: "10px 16px", borderRadius: 10, border: "none", cursor: "pointer" }}>🔍 Search</button>
         <button id="pinBtn" style={{ background: "#e33", color: "#fff", padding: "10px 16px", borderRadius: 10, border: "none", cursor: "pointer" }}>📍 Pin</button>
+        <button id="myLocationBtn" style={{ background: "#10b981", color: "#fff", padding: "10px 16px", borderRadius: 10, border: "none", cursor: "pointer" }}>📡 My Location</button>
       </div>
 
 <div
@@ -484,18 +481,18 @@ const getWeather = async (lat, lon) => {
         </button>
       </div>
 
-      <div ref={mountRef} style={{
-        width: "100%",
-        height: "100%",
-        borderRadius: "8px",
-        overflow: "hidden",
-      }}></div>
+      <div
+        ref={mountRef}
+        style={{
+          width: "100%",
+          height: "100%",
+          borderRadius: "8px",
+          overflow: "hidden",
+        }}
+      />
 
       {/* Fullscreen */}
       <button id="fullScreenBtn" style={{ position: "absolute", right: 20, top: 80, zIndex: 20, padding: 8, borderRadius: 8, cursor: "pointer" }}>🖥️</button>
-
-      {/* Globe */}
-      <div ref={mountRef} style={{ width: "100%", height: "100%" }} />
 
       {/* Popup */}
       <div ref={popupRef} style={{

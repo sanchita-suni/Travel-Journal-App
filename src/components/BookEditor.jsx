@@ -82,9 +82,7 @@ export default function BookEditor() {
   const [error, setError] = useState(null);
   const [isFlipping, setIsFlipping] = useState(false);
   const [flipDirection, setFlipDirection] = useState(1);
-  const [textColor, setTextColor] = useState('#000000');
-  const [fontSize, setFontSize] = useState(16);
-  const [isBold, setIsBold] = useState(false);
+  const [isBold, setIsBold] = useState(false); // reserved for future formatting buttons
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
   const [selectedSticker, setSelectedSticker] = useState(null);
@@ -304,8 +302,8 @@ export default function BookEditor() {
     };
   }, [moveSticker]);
 
-const handleInsertSticker = (pageIdx, stickerToken) => {
-    setPageContent(prev => {
+  const handleInsertSticker = (pageIdx, stickerToken) => {
+    setPageContent((prev) => {
       const newContent = { ...prev };
       const existing = newContent[pageIdx] || "";
       newContent[pageIdx] = existing + (existing ? "\n" : "") + stickerToken;
@@ -313,12 +311,11 @@ const handleInsertSticker = (pageIdx, stickerToken) => {
     });
   };
 
-  // Error boundary fallback
+  // Error boundary fallback (currently unused, but kept for future error handling)
   if (error) {
-    // Keep the error fallback logic here, if any, otherwise skip to the next logical function or component definition.
-    // If there's no code immediately following the error block, you can just start the next function.
+    // You could render an error UI here if something goes wrong in BookEditor.
   }
-  
+
   const handlePageClick = (e) => {
     if (e.target.dataset.sticker) return;
     setActiveStickerId(null);
@@ -351,7 +348,6 @@ const handleInsertSticker = (pageIdx, stickerToken) => {
 
   const renderSticker = (s) => {
     const active = s.id === activeStickerId;
-// The closing brace for the function, and the rest of the file logic continues here.
     return (
       <div
         key={s.id}
@@ -554,9 +550,9 @@ const handleInsertSticker = (pageIdx, stickerToken) => {
           Clear
         </button>
 
-        {/* Stickers */}
+        {/* Stickers (two UIs: quick insert tokens + draggable stickers popup) */}
         <div className="pt-4 border-t border-blue-700">
-          <p className="font-semibold text-center mb-2">Stickers</p>
+          <p className="font-semibold text-center mb-2">Stickers (drag onto page)</p>
           <button
             onClick={() => setShowStickers(true)}
             className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto"
@@ -565,13 +561,12 @@ const handleInsertSticker = (pageIdx, stickerToken) => {
           </button>
         </div>
 
-        {/* Stickers */}
-        <div className="mb-4">
-          <label className="block text-white text-sm font-semibold mb-2">Stickers</label>
+        <div className="mb-4 mt-4">
+          <label className="block text-white text-sm font-semibold mb-2">Sticker tags (insert into text)</label>
           <div className="grid grid-cols-4 gap-2">
             {[1,2,3,4,5,6,7,8,9,10,11].map((num) => {
-              const src = `/src/assets/stickers/sticker${num}.png`;
               const token = `[sticker${num}]`;
+              const imgSrc = stickerList[num - 1];
               return (
                 <button
                   key={num}
@@ -583,7 +578,7 @@ const handleInsertSticker = (pageIdx, stickerToken) => {
                   className={`w-12 h-12 rounded-md overflow-hidden border-2 ${selectedSticker === num ? 'border-yellow-300' : 'border-transparent'} bg-white flex items-center justify-center`}
                   title={`Sticker ${num}`}
                 >
-                  <img src={src} alt={`Sticker ${num}`} className="w-full h-full object-contain" />
+                  <img src={imgSrc} alt={`Sticker ${num}`} className="w-full h-full object-contain" />
                 </button>
               );
             })}
