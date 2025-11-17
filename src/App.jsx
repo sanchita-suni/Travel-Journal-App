@@ -1,53 +1,3 @@
-import React, { useState } from 'react';
-import Navbar from './components/Navbar/Navbar';
-// Import all page components
-import Home from './pages/Home/Home';
-import Globe from './pages/Globe';
-import Profile from './pages/Profile';
-import MyLibrary from './pages/MyLibrary';
-import TripPlanner from './pages/TripPlanner';
-import PublicFeeds from './pages/PublicFeeds';
-import PrivateZone from './pages/PrivateZone';
-import './App.css'; 
-
-const App = () => {
-    // State to manage simple navigation
-    const [currentPage, setCurrentPage] = useState('home');
-
-    // Function to render the correct page component based on state
-    const renderPage = () => {
-        switch (currentPage) {
-            case 'globe':
-                return <Globe />;
-            case 'profile':
-                return <Profile />;
-            case 'library':
-                return <MyLibrary />;
-            case 'trip-planner':
-                return <TripPlanner />;
-            case 'public':
-                return <PublicFeeds />;
-            case 'private':
-                return <PrivateZone />;
-            case 'home':
-            default:
-                return <Home />;
-        }
-    };
-
-    return (
-        <div className="App">
-            {/* Pass state control to the Navbar */}
-            <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
-            
-            <main className="main-content">
-                {renderPage()}
-            </main>
-        </div>
-    );
-};
-
-export default App;
 import React, { useEffect, useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import Earth from "./components/Earth.jsx";
@@ -55,6 +5,7 @@ import TripPlanner from "./components/TripPlanner.jsx";
 import Shelf3D from "./components/Shelf3D.jsx";
 import BookSelection from "./components/BookSelection.jsx";
 import BookEditor from "./components/BookEditor.jsx"; // ✅ Book view page
+import PublicFeeds from "./pages/PublicFeeds.jsx";
 import "./App.css";
 
 // --- Tailwind Config Loader ---
@@ -228,7 +179,7 @@ export default function App() {
         <Route path="/library" element={<MyLibraryPage />} />
         <Route path="/planner" element={<TripPlanner />} />
         <Route path="/lookup" element={<LookupPage />} />
-        <Route path="/public" element={<ComingSoon title="Public Journals" />} />
+        <Route path="/public" element={<PublicFeeds />} />
         <Route path="/private" element={<ComingSoon title="Private Journals" />} />
         <Route path="/profile" element={<ComingSoon title="Profile Page" />} />
         <Route path="/book-selection" element={<BookSelection />} />

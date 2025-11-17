@@ -25,3 +25,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local virtual env
+.cutievenv/
+
+# Frontend env
+.env
+
+# Vite cache
+.vite/
+
+# MacOS metadata
+._*

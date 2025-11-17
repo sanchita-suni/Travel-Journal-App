@@ -19,7 +19,7 @@ app.use("/uploads", express.static(path.resolve("uploads")));
 app.use("/api/posts", postRoutes);
 app.use("/api/users", userRoutes);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
