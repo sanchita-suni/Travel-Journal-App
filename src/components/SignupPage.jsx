@@ -14,7 +14,6 @@ export default function SignupPage({ onSignup, onGoToLogin }) {
     setLoading(true);
 
     try {
-      // 👇 FIXED: Port changed to 5000
       const res = await fetch("http://localhost:5000/api/users/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -36,8 +35,6 @@ export default function SignupPage({ onSignup, onGoToLogin }) {
     }
   }
 
-  const maskedPassword = "🧸".repeat(password.length);
-
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center"
@@ -52,15 +49,15 @@ export default function SignupPage({ onSignup, onGoToLogin }) {
         </h2>
 
         {error && (
-          <p className="text-red-300 text-sm mb-3 text-center bg-red-900/50 p-2 rounded">
+          <div className="bg-red-500/80 text-white p-2 rounded text-sm text-center mb-4 border border-red-400">
             {error}
-          </p>
+          </div>
         )}
 
         <form onSubmit={handleSignup} className="space-y-4">
           <input
             type="text"
-            className="w-full p-3 rounded-lg bg-white/40 placeholder-gray-200 text-white outline-none border border-transparent focus:border-yellow-300 transition"
+            className="w-full p-3 rounded-lg bg-white/40 placeholder-gray-200 text-white outline-none border border-transparent focus:border-yellow-300 transition placeholder:text-gray-100"
             placeholder="Full Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -69,7 +66,7 @@ export default function SignupPage({ onSignup, onGoToLogin }) {
 
           <input
             type="email"
-            className="w-full p-3 rounded-lg bg-white/40 placeholder-gray-200 text-white outline-none border border-transparent focus:border-yellow-300 transition"
+            className="w-full p-3 rounded-lg bg-white/40 placeholder-gray-200 text-white outline-none border border-transparent focus:border-yellow-300 transition placeholder:text-gray-100"
             placeholder="Email Address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -79,7 +76,7 @@ export default function SignupPage({ onSignup, onGoToLogin }) {
           <div className="relative">
             <input
               type={showPw ? "text" : "password"}
-              className="w-full p-3 rounded-lg bg-white/40 placeholder-gray-200 text-white outline-none border border-transparent focus:border-yellow-300 transition"
+              className="w-full p-3 rounded-lg bg-white/40 placeholder-gray-200 text-white outline-none border border-transparent focus:border-yellow-300 transition placeholder:text-gray-100"
               placeholder="Create Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -88,24 +85,27 @@ export default function SignupPage({ onSignup, onGoToLogin }) {
 
             <span
               onClick={() => setShowPw(!showPw)}
-              className="absolute right-3 top-3 cursor-pointer text-white select-none"
+              className="absolute right-3 top-3 cursor-pointer text-white text-xl select-none hover:scale-110 transition"
             >
-              {showPw ? "👁️" : maskedPassword.slice(0, 10)}
+              {showPw ? "👁️" : "🧸"}
             </span>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-500 text-white font-bold py-2 rounded-lg transition transform active:scale-95"
+            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-500 text-white font-bold py-2 rounded-lg transition transform active:scale-95 shadow-lg"
           >
             {loading ? "Creating..." : "Sign Up"}
           </button>
         </form>
 
-        <p className="text-center text-white mt-4">
+        <p className="text-center text-white mt-4 text-sm">
           Already have an account?{" "}
-          <button onClick={onGoToLogin} className="text-yellow-300 underline">
+          <button
+            onClick={onGoToLogin}
+            className="text-yellow-300 underline hover:text-yellow-400 font-semibold"
+          >
             Log in
           </button>
         </p>

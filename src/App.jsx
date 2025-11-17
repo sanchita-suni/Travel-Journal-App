@@ -10,7 +10,7 @@ import BookEditor from "./components/BookEditor.jsx";
 import LoginPage from "./components/LoginPage.jsx";
 import SignupPage from "./components/SignupPage.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
-
+import MyLibrary from "./components/MyLibrary.jsx";
 import "./App.css";
 
 /* ------------------------------------------------------
@@ -23,8 +23,7 @@ function TailwindConfig() {
     document.head.appendChild(script);
 
     const link = document.createElement("link");
-    link.href =
-      "https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap";
+    link.href = "https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap";
     link.rel = "stylesheet";
     document.head.appendChild(link);
 
@@ -45,8 +44,8 @@ function Navbar() {
     { name: "My Library", path: "/library" },
     { name: "Trip Planner", path: "/planner" },
     { name: "Look Up", path: "/lookup" },
-    { name: "Public", path: "/public" },
-    { name: "Private", path: "/private" },
+    { name: "Public", path: "/public" },   // 👈 UNCOMMENTED
+    { name: "Private", path: "/private" }, // 👈 UNCOMMENTED
     { name: "Profile", path: "/profile" },
   ];
 
@@ -144,7 +143,7 @@ function MyLibraryPage() {
 
       <button
         onClick={() => navigate("/book-selection")}
-        className="fixed bottom-6 right-6 bg-blue-600 text-white rounded-full p-4 text-3xl"
+        className="fixed bottom-6 right-6 bg-blue-600 text-white rounded-full p-4 text-3xl shadow-lg hover:bg-blue-700 transition-transform hover:scale-110"
       >
         +
       </button>
@@ -188,12 +187,11 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-
       {/* Hide navbar on login/signup */}
       {!hideNavbar && <Navbar />}
 
       <Routes>
-{/* LOGIN PAGE */}
+        {/* LOGIN PAGE */}
         <Route
           path="/login"
           element={
@@ -232,7 +230,7 @@ export default function App() {
           path="/library"
           element={
             <ProtectedRoute>
-              <MyLibraryPage />
+              <MyLibraryPage /> 
             </ProtectedRoute>
           }
         />
@@ -259,7 +257,7 @@ export default function App() {
           path="/public"
           element={
             <ProtectedRoute>
-              <PublicFeeds /> {/* Kept your PublicFeeds component */}
+              <PublicFeeds />
             </ProtectedRoute>
           }
         />

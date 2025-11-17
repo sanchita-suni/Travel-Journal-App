@@ -7,7 +7,6 @@ import fs from "fs";
 
 const router = express.Router();
 
-// --- Multer Setup for Image Uploads ---
 const uploadsDir = path.resolve("uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
@@ -17,47 +16,31 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// --- CREATE POST (With Book Data & Image) ---
+// --- CREATE POST ---
 router.post("/", auth, upload.single("image"), async (req, res) => {
   try {
-    const { 
-      title = "Untitled Journal", 
-      description = "A digital journal entry.", 
-      placeName = "Digital Entry", 
-      isPublic, 
-      tags, 
-      bookData 
-    } = req.body;
-
-    if (!title.trim()) return res.status(400).json({ message: "Title is required" });
+    const { title = "Untitled", description = "", placeName = "Digital Entry", isPublic, tags, bookData } = req.body;
+    
+    if (!title.trim()) return res.status(400).json({ message: "Title required" });
 
     let location = { type: "Point", coordinates: [0, 0], placeName: placeName || "Digital Entry" };
     
+    // Geocoding
     if (placeName && placeName !== "Digital Entry") {
        try {
-         const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(placeName)}`, {
-           headers: { "User-Agent": "TravelJournal/1.0" }
-         });
+         const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(placeName)}`, { headers: { "User-Agent": "TravelJournal/1.0" } });
          const geoData = await geoRes.json();
          if (Array.isArray(geoData) && geoData.length) {
            const { lat, lon, display_name } = geoData[0];
-           const latN = parseFloat(lat), lonN = parseFloat(lon);
-           if (!Number.isNaN(latN) && !Number.isNaN(lonN)) {
-             location = { type: "Point", coordinates: [lonN, latN], placeName: display_name };
-           }
+           location = { type: "Point", coordinates: [parseFloat(lon), parseFloat(lat)], placeName: display_name };
          }
-       } catch (e) {
-         console.log("Geo error ignored:", e.message);
-       }
+       } catch (e) { console.log("Geo error:", e.message); }
     }
 
     let parsedBookData = {};
     if (bookData) {
-        try { parsedBookData = JSON.parse(bookData); } catch(e) { console.error("Error parsing bookData:", e); }
+        try { parsedBookData = JSON.parse(bookData); } catch(e) { console.error("BookData parse error:", e); }
     }
-
-    const parsedTags = Array.isArray(tags) ? tags : (tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '') : []);
-    const finalIsPublic = isPublic === 'true' || isPublic === true;
 
     const post = new Post({
       user: req.userId,
@@ -66,30 +49,24 @@ router.post("/", auth, upload.single("image"), async (req, res) => {
       placeName: location.placeName,
       location,
       imageUrl: req.file ? `/uploads/${req.file.filename}` : "",
-      isPublic: finalIsPublic,
-      tags: parsedTags,
+      isPublic: isPublic === 'true' || isPublic === true,
+      tags: Array.isArray(tags) ? tags : (tags ? tags.split(',') : []),
       bookData: parsedBookData
     });
 
     const saved = await post.save();
     res.status(201).json({ success: true, post: saved });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
-// ==================================================================
-// 🚨 IMPORTANT: Specific routes (like /mine) MUST come BEFORE /:id
-// ==================================================================
-
-// --- MY POSTS (Moved UP!) ---
+// --- MY POSTS (MUST BE BEFORE /:id) ---
 router.get("/mine", auth, async (req, res) => {
   try {
     const posts = await Post.find({ user: req.userId }).sort({ createdAt: -1 }).lean();
     res.json(posts);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ message: err.message });
   }
 });
@@ -97,17 +74,17 @@ router.get("/mine", auth, async (req, res) => {
 // --- PUBLIC FEED ---
 router.get("/", async (req, res) => {
   try {
-    const posts = await Post.find({ isPublic: true }).populate("user", "name avatar").sort({ createdAt: -1 }).lean();
+    const posts = await Post.find({ isPublic: true }).populate("user", "name").sort({ createdAt: -1 }).lean();
     res.json(posts);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// --- GET SINGLE POST (Dynamic ID Route - Must be last of the GETs) ---
+// --- GET SINGLE POST ---
 router.get("/:id", async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id).populate("user", "name avatar").lean();
+    const post = await Post.findById(req.params.id).populate("user", "name").lean();
     if (!post) return res.status(404).json({ message: "Not found" });
     res.json(post);
   } catch (err) {
@@ -115,7 +92,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// --- DELETE POST ---
+// --- DELETE ---
 router.delete("/:id", auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -128,7 +105,7 @@ router.delete("/:id", auth, async (req, res) => {
   }
 });
 
-// --- UPDATE POST (PATCH) ---
+// --- PATCH ---
 router.patch("/:id", auth, upload.single("image"), async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -139,31 +116,14 @@ router.patch("/:id", auth, upload.single("image"), async (req, res) => {
     updates.forEach(k => { if (k in req.body) post[k] = req.body[k]; });
 
     if (req.file) post.imageUrl = `/uploads/${req.file.filename}`;
-
-    if (req.body.placeName && req.body.placeName !== post.placeName) {
-      const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(req.body.placeName)}`, {
-        headers: { "User-Agent": "TravelJournal/1.0" }
-      });
-      const geoData = await geoRes.json();
-      if (Array.isArray(geoData) && geoData.length) {
-        const { lat, lon, display_name } = geoData[0];
-        const latN = parseFloat(lat), lonN = parseFloat(lon);
-        if (!Number.isNaN(latN) && !Number.isNaN(lonN)) {
-          post.location = { type: "Point", coordinates: [lonN, latN], placeName: display_name || req.body.placeName };
-        }
-      }
-    }
-
     if (req.body.bookData) {
-        try {
-             post.bookData = JSON.parse(req.body.bookData);
-        } catch(e) { console.error(e); }
+        try { post.bookData = JSON.parse(req.body.bookData); } catch(e) {}
     }
 
     const saved = await post.save();
     res.json({ success: true, post: saved });
   } catch (err) {
-    console.error(err); res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
 });
 
