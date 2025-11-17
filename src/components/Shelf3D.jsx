@@ -9,6 +9,7 @@ export default function Shelf3D() {
     const fetchBooks = async () => {
       const token = localStorage.getItem("token");
       if (!token) return;
+
       try {
         const res = await fetch("http://localhost:5000/api/posts/mine", {
           headers: { Authorization: `Bearer ${token}` },
@@ -16,7 +17,7 @@ export default function Shelf3D() {
         const data = await res.json();
         if (Array.isArray(data)) setBooks(data);
       } catch (err) {
-        console.error(err);
+        console.error("Error loading library:", err);
       }
     };
     fetchBooks();
@@ -51,14 +52,29 @@ export default function Shelf3D() {
     </div>
   );
 
+  // ✅ REMOVED Title and Add Button to prevent duplication
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column", gap: "40px", width: "100%", paddingBottom: "80px" }}>
-      <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">My Private Library</h2>
-      <div style={{ width: "80%", height: "120px", backgroundColor: "#1e293b", border: "5px solid #92400e", borderRadius: "10px", boxShadow: "0 4px 20px rgba(0,0,0,0.3)", display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: "8px", color: "#e2e8f0", fontWeight: "500" }}>{books.length === 0 ? <span className="opacity-50">Shelf 1 Empty</span> : books.slice(0, 8).map((book, i) => <BookSpine key={book._id} book={book} index={i} />)}</div>
-      <div style={{ width: "80%", height: "120px", backgroundColor: "#1e293b", border: "5px solid #92400e", borderRadius: "10px", boxShadow: "0 4px 20px rgba(0,0,0,0.3)", display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: "8px", color: "#e2e8f0", fontWeight: "500" }}>{books.slice(8, 16).map((book, i) => <BookSpine key={book._id} book={book} index={i + 8} />)}</div>
-      <div style={{ width: "80%", height: "120px", backgroundColor: "#1e293b", border: "5px solid #92400e", borderRadius: "10px", boxShadow: "0 4px 20px rgba(0,0,0,0.3)", display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: "8px", color: "#e2e8f0", fontWeight: "500" }}>{books.slice(16, 24).map((book, i) => <BookSpine key={book._id} book={book} index={i + 16} />)}</div>
-      <button onClick={() => navigate("/book-selection")} className="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-3xl font-bold z-50 transition-transform hover:scale-110">+</button>
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column", gap: "40px", width: "100%", paddingBottom: "40px" }}>
+      
+      {/* Shelf Tier 1 */}
+      <div style={{ width: "80%", height: "120px", backgroundColor: "#1e293b", border: "5px solid #92400e", borderRadius: "10px", boxShadow: "0 4px 20px rgba(0,0,0,0.3)", display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: "8px", color: "#e2e8f0", fontWeight: "500" }}>
+        {books.length === 0 ? <span className="opacity-50">Empty Shelf</span> : books.slice(0, 8).map((book, i) => <BookSpine key={book._id} book={book} index={i} />)}
+      </div>
+
+      {/* Shelf Tier 2 */}
+      <div style={{ width: "80%", height: "120px", backgroundColor: "#1e293b", border: "5px solid #92400e", borderRadius: "10px", boxShadow: "0 4px 20px rgba(0,0,0,0.3)", display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: "8px", color: "#e2e8f0", fontWeight: "500" }}>
+        {books.slice(8, 16).map((book, i) => <BookSpine key={book._id} book={book} index={i + 8} />)}
+      </div>
+
+      {/* Shelf Tier 3 */}
+      <div style={{ width: "80%", height: "120px", backgroundColor: "#1e293b", border: "5px solid #92400e", borderRadius: "10px", boxShadow: "0 4px 20px rgba(0,0,0,0.3)", display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: "8px", color: "#e2e8f0", fontWeight: "500" }}>
+        {books.slice(16, 24).map((book, i) => <BookSpine key={book._id} book={book} index={i + 16} />)}
+      </div>
     </div>
   );
 }
-function getBookColor(i) { const colors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4"]; return colors[i % colors.length]; }
+
+function getBookColor(i) {
+  const colors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4"];
+  return colors[i % colors.length];
+}
