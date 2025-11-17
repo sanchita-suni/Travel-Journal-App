@@ -23,9 +23,9 @@ const PORT = process.env.PORT || 5001;
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
-    console.log("✅ MongoDB Connected");
-    app.listen(PORT, () => console.log("🚀 Server running on port", PORT));
+    console.log("MongoDB Connected");
+    app.listen(PORT, () => console.log("Server running on port", PORT));
   })
   .catch(err => {
-    console.error("❌ DB Error:", err.message);
+    console.error("DB Error:", err.message);
   });

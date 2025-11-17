@@ -11,5 +11,5 @@ JournalEntry.create({
   isPublic: true,
   coordinates: { lat: 15.29, lng: 74.12 }
 })
-.then(() => console.log("✅ Test Entry Inserted"))
+.then(() => console.log("Test Entry Inserted"))
 .then(() => process.exit());

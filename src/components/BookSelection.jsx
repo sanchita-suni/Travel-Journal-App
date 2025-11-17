@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 export default function BookSelection() {
   const navigate = useNavigate();
 
-  // 📘 Example book list — update cover paths or add more books if needed
+  // 📘 Template list
   const books = [
     {
       id: 1,
@@ -50,7 +50,7 @@ export default function BookSelection() {
 
       {/* 🏷️ Title */}
       <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-10 text-center">
-        Choose My Book
+        Choose a Journal Cover
       </h1>
 
       {/* 📚 Book Grid */}
@@ -59,10 +59,10 @@ export default function BookSelection() {
           <div
             key={book.id}
             onClick={() =>
-              // include cover/title in both location.state and query string so BookEditor
-              // can read it from state (immediate) or query (refresh / direct link)
+              // ⭐ FIX: Go to 'new', but CARRY the cover/title info in the URL & State
+              // The Editor will read these and show the correct template!
               navigate(
-                `/book/${book.id}?cover=${encodeURIComponent(book.cover)}&title=${encodeURIComponent(book.title)}`,
+                `/book/new?cover=${encodeURIComponent(book.cover)}&title=${encodeURIComponent(book.title)}`,
                 { state: { cover: book.cover, title: book.title } }
               )
             }
@@ -71,7 +71,8 @@ export default function BookSelection() {
             <img
               src={book.cover}
               alt={book.title}
-              className="w-full h-52 object-cover"
+              className="w-full h-52 object-cover bg-gray-300"
+              onError={(e) => (e.target.src = "https://via.placeholder.com/150?text=Cover")}
             />
             <div className="p-3 text-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">

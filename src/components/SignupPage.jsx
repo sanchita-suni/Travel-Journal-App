@@ -1,19 +1,39 @@
 import React, { useState } from "react";
 
 export default function SignupPage({ onSignup, onGoToLogin }) {
-  const [username, setUsername] = useState("");
-  const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleSignup(e) {
+  async function handleSignup(e) {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
-    const newUser = { username, phone, password };
+    try {
+      // 👇 FIXED: Port changed to 5000
+      const res = await fetch("http://localhost:5000/api/users/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-    localStorage.setItem("travelUser", JSON.stringify(newUser));
-    alert("Account created! Please log in.");
-    onSignup();
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Signup failed");
+      }
+
+      alert("Account created! Please log in.");
+      onSignup(); 
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   const maskedPassword = "🧸".repeat(password.length);
@@ -31,29 +51,35 @@ export default function SignupPage({ onSignup, onGoToLogin }) {
           Create Account ✨
         </h2>
 
+        {error && (
+          <p className="text-red-300 text-sm mb-3 text-center bg-red-900/50 p-2 rounded">
+            {error}
+          </p>
+        )}
+
         <form onSubmit={handleSignup} className="space-y-4">
           <input
             type="text"
-            className="w-full p-3 rounded-lg bg-white/40 placeholder-gray-200 text-white outline-none"
-            placeholder="Choose Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            className="w-full p-3 rounded-lg bg-white/40 placeholder-gray-200 text-white outline-none border border-transparent focus:border-yellow-300 transition"
+            placeholder="Full Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
           />
 
           <input
-            type="tel"
-            className="w-full p-3 rounded-lg bg-white/40 placeholder-gray-200 text-white outline-none"
-            placeholder="Phone Number"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            type="email"
+            className="w-full p-3 rounded-lg bg-white/40 placeholder-gray-200 text-white outline-none border border-transparent focus:border-yellow-300 transition"
+            placeholder="Email Address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
 
           <div className="relative">
             <input
               type={showPw ? "text" : "password"}
-              className="w-full p-3 rounded-lg bg-white/40 placeholder-gray-200 text-white outline-none"
+              className="w-full p-3 rounded-lg bg-white/40 placeholder-gray-200 text-white outline-none border border-transparent focus:border-yellow-300 transition"
               placeholder="Create Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -62,17 +88,18 @@ export default function SignupPage({ onSignup, onGoToLogin }) {
 
             <span
               onClick={() => setShowPw(!showPw)}
-              className="absolute right-3 top-3 cursor-pointer text-white"
+              className="absolute right-3 top-3 cursor-pointer text-white select-none"
             >
-              {showPw ? "👁️" : maskedPassword}
+              {showPw ? "👁️" : maskedPassword.slice(0, 10)}
             </span>
           </div>
 
           <button
             type="submit"
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg transition"
+            disabled={loading}
+            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-500 text-white font-bold py-2 rounded-lg transition transform active:scale-95"
           >
-            Sign Up
+            {loading ? "Creating..." : "Sign Up"}
           </button>
         </form>
 

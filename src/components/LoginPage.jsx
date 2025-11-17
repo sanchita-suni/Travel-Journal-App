@@ -1,29 +1,43 @@
 import React, { useState } from "react";
 
 export default function LoginPage({ onLogin, onGoToSignup }) {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
-    const savedUser = JSON.parse(localStorage.getItem("travelUser"));
+    try {
+      // 👇 FIXED: Port changed to 5000
+      const res = await fetch("http://localhost:5000/api/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (!savedUser) {
-      setError("No account found. Please create one.");
-      return;
-    }
+      const data = await res.json();
 
-    if (
-      savedUser.username === username &&
-      savedUser.password === password
-    ) {
+      if (!res.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      localStorage.setItem("token", data.token);
       localStorage.setItem("isLoggedIn", "true");
-      onLogin();
-    } else {
-      setError("Invalid username or password");
+      
+      if (data.user) {
+         localStorage.setItem("userData", JSON.stringify(data.user));
+      }
+
+      onLogin(); 
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -42,53 +56,49 @@ export default function LoginPage({ onLogin, onGoToSignup }) {
         </h2>
 
         {error && (
-          <p className="text-red-300 text-sm mb-3 text-center">
+          <p className="text-red-300 text-sm mb-3 text-center bg-red-900/50 p-2 rounded">
             {error}
           </p>
         )}
 
         <form onSubmit={handleLogin} className="space-y-4">
 
-          {/* Username */}
           <input
-            type="text"
-            className="w-full p-3 rounded-lg bg-white/40 placeholder-gray-200 text-white outline-none"
-            placeholder="Enter Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            type="email"
+            className="w-full p-3 rounded-lg bg-white/40 placeholder-gray-200 text-white outline-none border border-transparent focus:border-yellow-300 transition"
+            placeholder="Enter Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
 
-          {/* PASSWORD FIELD - FIXED */}
           <div className="relative">
             <input
               type={showPw ? "text" : "password"}
-              className="w-full p-3 rounded-lg bg-white/40 placeholder-gray-200 text-white outline-none"
+              className="w-full p-3 rounded-lg bg-white/40 placeholder-gray-200 text-white outline-none border border-transparent focus:border-yellow-300 transition"
               placeholder="Enter Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
 
-            {/* 👁️ or 🧸🧸🧸 mask */}
             <span
               onClick={() => setShowPw(!showPw)}
-              className="absolute right-3 top-3 cursor-pointer text-white text-xl"
+              className="absolute right-3 top-3 cursor-pointer text-white text-xl select-none"
             >
               {showPw ? "👁️" : "🧸🧸🧸"}
             </span>
           </div>
 
-          {/* LOGIN BUTTON */}
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-500 text-white font-bold py-2 rounded-lg transition transform active:scale-95"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
-        {/* SIGNUP LINK */}
         <p className="text-center text-white mt-4">
           Don’t have an account?{" "}
           <button
