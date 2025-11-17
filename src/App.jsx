@@ -46,7 +46,7 @@ function Navbar() {
     { name: "My Library", path: "/library" },
     { name: "Trip Planner", path: "/planner" },
     { name: "Look Up", path: "/lookup" },
-    { name: "Public", path: "/public" },
+    //{ name: "Public", path: "/public" },
     //{ name: "Private", path: "/private" },
     { name: "Profile", path: "/profile" },
   ];
