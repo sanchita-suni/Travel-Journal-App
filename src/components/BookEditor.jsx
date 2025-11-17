@@ -255,6 +255,7 @@ export default function BookEditor() {
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
+  const [selectedSticker, setSelectedSticker] = useState(null);
 
   // Force open the book when a cover is selected
   useEffect(() => {
@@ -318,6 +319,15 @@ export default function BookEditor() {
       return newContent;
     });
   }, []);
+
+  const handleInsertSticker = (pageIdx, stickerToken) => {
+    setPageContent(prev => {
+      const newContent = { ...prev };
+      const existing = newContent[pageIdx] || "";
+      newContent[pageIdx] = existing + (existing ? "\n" : "") + stickerToken;
+      return newContent;
+    });
+  };
 
   // Error boundary fallback
   if (error) {
@@ -532,6 +542,31 @@ export default function BookEditor() {
                 title={color}
               />
             ))}
+          </div>
+        </div>
+
+        {/* Stickers */}
+        <div className="mb-4">
+          <label className="block text-white text-sm font-semibold mb-2">Stickers</label>
+          <div className="grid grid-cols-4 gap-2">
+            {[1,2,3,4,5,6,7,8,9,10,11].map((num) => {
+              const src = `/src/assets/stickers/sticker${num}.png`;
+              const token = `[sticker${num}]`;
+              return (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => {
+                    setSelectedSticker(num);
+                    handleInsertSticker(pageIndex, token);
+                  }}
+                  className={`w-12 h-12 rounded-md overflow-hidden border-2 ${selectedSticker === num ? 'border-yellow-300' : 'border-transparent'} bg-white flex items-center justify-center`}
+                  title={`Sticker ${num}`}
+                >
+                  <img src={src} alt={`Sticker ${num}`} className="w-full h-full object-contain" />
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

@@ -6,6 +6,9 @@ import gsap from "gsap";
 export default function Earth() {
   const mountRef = useRef(null);
   const [weather, setWeather] = useState(null);
+  const [mapStyle, setMapStyle] = useState("terrain");
+  const earthRef = useRef(null);
+  const texturesRef = useRef({});
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -33,11 +36,21 @@ export default function Earth() {
     window.addEventListener("resize", handleResize);
 
     const loader = new THREE.TextureLoader();
-    const earthTexture = loader.load("/earth_texture.jpg");
+    const textureTerrain = loader.load("/earth_terrain.jpg");
+    const textureNight = loader.load("/earth_night.jpg");
+    const textureStreet = loader.load("/earth_street.jpg");
+
+    texturesRef.current = {
+      terrain: textureTerrain,
+      night: textureNight,
+      street: textureStreet,
+    };
+
     const earth = new THREE.Mesh(
       new THREE.SphereGeometry(1, 64, 64),
-      new THREE.MeshStandardMaterial({ map: earthTexture, roughness: 0.9 })
+      new THREE.MeshStandardMaterial({ map: texturesRef.current[mapStyle] || textureTerrain, roughness: 0.9 })
     );
+    earthRef.current = earth;
     scene.add(earth);
 
     const atmosphere = new THREE.Mesh(
@@ -218,15 +231,26 @@ export default function Earth() {
       window.removeEventListener("resize", handleResize);
       mount.removeChild(renderer.domElement);
     };
-  }, []);
+  }, [mapStyle]);
 
-  const btnStyle = (color) => ({
+  useEffect(() => {
+    const earth = earthRef.current;
+    const textures = texturesRef.current;
+    if (earth && textures && textures[mapStyle]) {
+      earth.material.map = textures[mapStyle];
+      earth.material.needsUpdate = true;
+    }
+  }, [mapStyle]);
+
+  const btnStyle = (color, isActive = false) => ({
     background: color,
     color: "white",
     padding: "10px 15px",
     border: "none",
     borderRadius: "8px",
     cursor: "pointer",
+    opacity: isActive ? 1 : 0.7,
+    boxShadow: isActive ? "0 0 10px rgba(255,255,255,0.4)" : "none",
   });
 
   return (
@@ -264,6 +288,40 @@ export default function Earth() {
         <button id="searchBtn" style={btnStyle("#007bff")}>🔍 Search</button>
         <button id="pinBtn" style={btnStyle("red")}>📍 Pin</button>
         <button id="myLocationBtn" style={btnStyle("green")}>📡 My Location</button>
+      </div>
+
+      <div
+        style={{
+          position: "absolute",
+          bottom: "20px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          gap: "10px",
+          zIndex: 10,
+          background: "rgba(0,0,0,0.5)",
+          padding: "8px 12px",
+          borderRadius: "12px",
+        }}
+      >
+        <button
+          onClick={() => setMapStyle("terrain")}
+          style={btnStyle("#1D4ED8", mapStyle === "terrain")}
+        >
+          🗺️ Terrain
+        </button>
+        <button
+          onClick={() => setMapStyle("street")}
+          style={btnStyle("#059669", mapStyle === "street")}
+        >
+          🏙️ Street
+        </button>
+        <button
+          onClick={() => setMapStyle("night")}
+          style={btnStyle("#4B5563", mapStyle === "night")}
+        >
+          🌌 Night
+        </button>
       </div>
 
       <div ref={mountRef} style={{
