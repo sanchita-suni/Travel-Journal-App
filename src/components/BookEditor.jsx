@@ -1,6 +1,7 @@
 // BookEditor.jsx — FINAL VERSION WITH BACKWARD-TYPING FIX + TRANSFORM FIX
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 /* -------------------------------------------------------------
    IMPORT STICKERS
@@ -94,6 +95,31 @@ export default function BookEditor() {
   const [currentFont, setCurrentFont] = useState("Georgia");
   const [fontSize, setFontSize] = useState(18);
   const [textColor, setTextColor] = useState("#000");
+
+  const handleSaveBook = async () => {
+    try {
+      const savedUser = JSON.parse(localStorage.getItem("travelUser"));
+      if (!savedUser || !savedUser.username) {
+        alert("You must be logged in (local) to save a book.");
+        return;
+      }
+
+      const bookData = {
+        //id,                // optional: for updates later
+        username: savedUser.username,
+        title,
+        coverImg,
+        pages: pageContent,
+      };
+
+      const res = await axios.post("http://localhost:5001/api/books", bookData);
+      console.log("[BookEditor] Saved book:", res.data);
+      alert("Book saved to backend!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save book. Check console for details.");
+    }
+  };
 
   /* STICKERS */
   const stickerList = [
@@ -488,6 +514,15 @@ export default function BookEditor() {
 
       {/* TOOLS PANEL */}
       <div className="w-1/4 h-full bg-blue-800 p-5 overflow-y-auto space-y-5">
+
+        <div>
+          <button
+            onClick={handleSaveBook}
+            className="w-full mb-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow-md text-sm font-semibold"
+          >
+            Save Book :)
+          </button>
+        </div>
 
         <div>
           <p className="font-semibold mb-1">Font</p>

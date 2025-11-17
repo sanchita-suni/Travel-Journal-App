@@ -11,6 +11,7 @@ import LoginPage from "./components/LoginPage.jsx";
 import SignupPage from "./components/SignupPage.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
 
+import MyLibrary from "./components/MyLibrary.jsx";
 import "./App.css";
 
 /* ------------------------------------------------------
@@ -46,7 +47,7 @@ function Navbar() {
     { name: "Trip Planner", path: "/planner" },
     { name: "Look Up", path: "/lookup" },
     { name: "Public", path: "/public" },
-    { name: "Private", path: "/private" },
+    //{ name: "Private", path: "/private" },
     { name: "Profile", path: "/profile" },
   ];
 
@@ -232,7 +233,7 @@ export default function App() {
           path="/library"
           element={
             <ProtectedRoute>
-              <MyLibraryPage />
+              <MyLibrary />
             </ProtectedRoute>
           }
         />

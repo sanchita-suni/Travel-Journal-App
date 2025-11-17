@@ -6,6 +6,7 @@ import postRoutes from "./routes/postRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import path from "path";
 import dotenv from "dotenv";
+import bookRoutes from "./routes/bookRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -18,7 +19,9 @@ app.use("/uploads", express.static(path.resolve("uploads")));
 // routes
 app.use("/api/posts", postRoutes);
 app.use("/api/users", userRoutes);
-
+app.use("/api/posts", postRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/books", bookRoutes);
 const PORT = process.env.PORT || 5001;
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
