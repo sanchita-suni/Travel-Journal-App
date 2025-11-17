@@ -41,7 +41,7 @@ export default function MyLibrary() {
         ))}
       </div>
 
-      {/* Floating Add (+) Button */}
+      {/* ➕ Floating Add Button */}
       <button
         onClick={() => navigate("/book-selection")}
         className="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full w-16 h-16 text-4xl flex items-center justify-center shadow-lg transition-all duration-300"
